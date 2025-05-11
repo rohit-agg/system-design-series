@@ -6,35 +6,31 @@ import java.util.concurrent.ThreadLocalRandom;
 class Server {
 
   private String name;
-  private int numberOfRequests;
-  private double averageResponseTime;
+  private double cpuUtilization;
 
   public Server(String name) {
     this.name = name;
-    this.numberOfRequests = 0;
-    this.averageResponseTime = 0.0;
-    System.out.println("Server: " + this.name + ", no of Requests: 0, avg Response Time: 0ms initialized successfully");
+    this.refresh();
+    System.out.println("Server: " + this.name + ", CPU utilizaton: " + String.format("%.2f", this.cpuUtilization)
+        + " initialized successfully");
   }
 
   public String getName() {
     return this.name;
   }
 
-  public double getAverageResponseTime() {
-    return this.averageResponseTime;
+  public double getCpuUtilization() {
+    return this.cpuUtilization;
   }
 
-  public void addRequest(int responseTime) {
-
-    double totalResponseTime = this.numberOfRequests * this.averageResponseTime;
-    this.numberOfRequests++;
-    this.averageResponseTime = (totalResponseTime + responseTime) / this.numberOfRequests;
+  public void refresh() {
+    this.cpuUtilization = ThreadLocalRandom.current().nextDouble(5, 10);
   }
 }
 
 class LoadBalancer {
 
-  List<Server> servers;
+  private List<Server> servers;
 
   public LoadBalancer(List<Server> servers) {
     this.servers = servers;
@@ -43,24 +39,22 @@ class LoadBalancer {
 
   public Server getNextServer() {
 
-    int minResponseTime = ThreadLocalRandom.current().nextInt(100, 125);
-    int responseTime = ThreadLocalRandom.current().nextInt(minResponseTime, 150);
-    Double avgResponseTime = Double.MAX_VALUE;
     Server currentServer = null;
+    double minCpuUtil = Double.MAX_VALUE;
 
     for (Server server : this.servers) {
-      if (server.getAverageResponseTime() < avgResponseTime) {
+      if (server.getCpuUtilization() < minCpuUtil) {
+        minCpuUtil = server.getCpuUtilization();
         currentServer = server;
-        avgResponseTime = server.getAverageResponseTime();
       }
     }
 
-    currentServer.addRequest(responseTime);
+    currentServer.refresh();
     return currentServer;
   }
 }
 
-public class LeastResponseTime {
+public class ResourceBased {
 
   public static void main(String... args) throws InterruptedException {
 
@@ -85,8 +79,8 @@ public class LeastResponseTime {
 
     for (int i = 1; i <= numOfRequests; i++) {
       Server nextServer = loadBalancer.getNextServer();
-      System.out.println("Request " + i + " routed to " + nextServer.getName() + " with avg response time "
-          + String.format("%.2f", nextServer.getAverageResponseTime()) + "ms");
+      System.out.println("Request " + i + " routed to " + nextServer.getName() + " with CPU Utilisation "
+          + String.format("%.2f", nextServer.getCpuUtilization()) + "%");
       Thread.sleep(250);
     }
 
