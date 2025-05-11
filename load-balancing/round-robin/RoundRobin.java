@@ -28,8 +28,10 @@ public class RoundRobin {
 
     Scanner scanner = new Scanner(System.in);
 
+    System.out.println();
     System.out.print("Enter the number of servers: ");
     int servers = scanner.nextInt();
+    System.out.println();
 
     List<String> serverList = new ArrayList<>();
     for (int i = 1; i <= servers; i++) {
@@ -38,8 +40,10 @@ public class RoundRobin {
 
     LoadBalancer loadBalancer = new LoadBalancer(serverList);
 
+    System.out.println();
     System.out.print("Enter the number of requests to simulate: ");
     int numOfRequests = scanner.nextInt();
+    System.out.println();
 
     for (int i = 1; i <= numOfRequests; i++) {
       String nextServer = loadBalancer.getNextServer();
