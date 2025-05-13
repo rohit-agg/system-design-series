@@ -8,21 +8,21 @@ import java.util.AbstractMap.SimpleEntry;
 
 class LoadBalancer {
 
-  private PriorityQueue<Entry<Integer, String>> servers;
+  private PriorityQueue<Entry<String, Integer>> servers;
 
   public LoadBalancer(List<String> servers) {
     this.servers = new PriorityQueue<>(
-      Comparator.comparingInt(Entry::getKey)
+      Comparator.comparingInt(Entry::getValue)
     );
     for (String server : servers) {
-      this.servers.offer(new SimpleEntry<>(0, server));
+      this.servers.offer(new SimpleEntry<>(server, 0));
     }
     System.out.println("Load Balancer initialized successfully");
   }
 
-  public Entry<Integer, String> getNextServer() {
-    Entry<Integer, String> nextServer = this.servers.poll();
-    this.servers.offer(new SimpleEntry<>(nextServer.getKey() + 1, nextServer.getValue()));
+  public Entry<String, Integer> getNextServer() {
+    Entry<String, Integer> nextServer = this.servers.poll();
+    this.servers.offer(new SimpleEntry<>(nextServer.getKey(), nextServer.getValue() + 1));
     return nextServer;
   }
 }
@@ -51,8 +51,8 @@ public class LeastConnection {
     System.out.println();
 
     for (int i = 1; i <= numOfRequests; i++) {
-      Entry<Integer, String> nextServer = loadBalancer.getNextServer();
-      System.out.println("Request " + i + " routed to " + nextServer.getValue() + " which had " + nextServer.getKey() + " connections.");
+      Entry<String, Integer> nextServer = loadBalancer.getNextServer();
+      System.out.println("Request " + i + " routed to " + nextServer.getKey() + " which had " + nextServer.getValue() + " connections.");
       Thread.sleep(250);
     }
 
